@@ -136,13 +136,17 @@ gltfLoader.load('./models.glb', gltf => {
       uResolution: new THREE.Uniform(
         new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)
       ),
-      uProgress: new THREE.Uniform(0),
+      uProgress: new THREE.Uniform(0.001),
     },
   });
 
   // Points
   particles.points = new THREE.Points(particles.geometry, particles.material);
   scene.add(particles.points);
+
+  // Tweaks
+
+  gui.add(particles.material.uniforms.uProgress, 'value', 0, 1, 0.001).name('Progress');
 });
 
 /**
