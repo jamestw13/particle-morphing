@@ -195,6 +195,8 @@ gltfLoader.load('./models.glb', gltf => {
   gui.add(particles, 'morph3').name('Morph 3');
 });
 
+gui.close();
+
 /**
  * Animate
  */
