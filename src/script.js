@@ -132,6 +132,9 @@ gltfLoader.load('./models.glb', gltf => {
   particles.geometry.setAttribute('aSize', new THREE.BufferAttribute(sizesArray, 1));
 
   // Material
+  particles.colorA = '#ff0000';
+  particles.colorB = '#0000ff';
+
   particles.material = new THREE.ShaderMaterial({
     vertexShader: particlesVertexShader,
     fragmentShader: particlesFragmentShader,
@@ -144,6 +147,8 @@ gltfLoader.load('./models.glb', gltf => {
         new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)
       ),
       uProgress: new THREE.Uniform(0.001),
+      uColorA: new THREE.Uniform(new THREE.Color(particles.colorA)),
+      uColorB: new THREE.Uniform(new THREE.Color(particles.colorB)),
     },
   });
 
@@ -161,6 +166,19 @@ gltfLoader.load('./models.glb', gltf => {
 
     particles.index = index;
   };
+
+  gui
+    .addColor(particles, 'colorA')
+    .name('Color A')
+    .onChange(() => {
+      particles.material.uniforms.uColorA.value.set(particles.colorA);
+    });
+  gui
+    .addColor(particles, 'colorB')
+    .name('Color B')
+    .onChange(() => {
+      particles.material.uniforms.uColorB.value.set(particles.colorB);
+    });
 
   particles.morph0 = () => particles.morph(0);
   particles.morph1 = () => particles.morph(1);
