@@ -93,6 +93,8 @@ let particles = null;
 gltfLoader.load('./models.glb', gltf => {
   particles = {};
 
+  particles.index = 0;
+
   // Positions
   const positions = gltf.scene.children.map(child => child.geometry.attributes.position);
   particles.maxCount = Math.max(...positions.map(position => position.count));
@@ -120,9 +122,14 @@ gltfLoader.load('./models.glb', gltf => {
   }
 
   // Geometry
+  const sizesArray = new Float32Array(particles.maxCount);
+  for (let i = 0; i < particles.maxCount; i++) {
+    sizesArray[i] = Math.random();
+  }
   particles.geometry = new THREE.BufferGeometry();
-  particles.geometry.setAttribute('position', particles.positions[1]);
+  particles.geometry.setAttribute('position', particles.positions[particles.index]);
   particles.geometry.setAttribute('aPositionTarget', particles.positions[3]);
+  particles.geometry.setAttribute('aSize', new THREE.BufferAttribute(sizesArray, 1));
 
   // Material
   particles.material = new THREE.ShaderMaterial({
@@ -132,7 +139,7 @@ gltfLoader.load('./models.glb', gltf => {
     depthWrite: false,
     blending: THREE.AdditiveBlending,
     uniforms: {
-      uSize: new THREE.Uniform(0.2),
+      uSize: new THREE.Uniform(0.4),
       uResolution: new THREE.Uniform(
         new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)
       ),
@@ -144,9 +151,29 @@ gltfLoader.load('./models.glb', gltf => {
   particles.points = new THREE.Points(particles.geometry, particles.material);
   scene.add(particles.points);
 
-  // Tweaks
+  // Methods
+  particles.morph = index => {
+    particles.geometry.setAttribute('position', particles.positions[particles.index]);
+    particles.geometry.setAttribute('aPositionTarget', particles.positions[index]);
 
-  gui.add(particles.material.uniforms.uProgress, 'value', 0, 1, 0.001).name('Progress');
+    // Animate uProgress
+    gsap.fromTo(particles.material.uniforms.uProgress, { value: 0 }, { value: 1, duration: 3, ease: 'linear' });
+
+    particles.index = index;
+  };
+
+  particles.morph0 = () => particles.morph(0);
+  particles.morph1 = () => particles.morph(1);
+  particles.morph2 = () => particles.morph(2);
+  particles.morph3 = () => particles.morph(3);
+
+  // Tweaks
+  gui.add(particles.material.uniforms.uProgress, 'value', 0, 1, 0.001).name('Progress').listen();
+
+  gui.add(particles, 'morph0').name('Morph 0');
+  gui.add(particles, 'morph1').name('Morph 1');
+  gui.add(particles, 'morph2').name('Morph 2');
+  gui.add(particles, 'morph3').name('Morph 3');
 });
 
 /**
